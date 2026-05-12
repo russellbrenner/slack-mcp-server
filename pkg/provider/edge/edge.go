@@ -80,18 +80,17 @@ func NewWithClient(workspaceName string, teamID string, token string, cl *http.C
 	if token == "" {
 		return nil, ErrNoToken
 	}
-	tape, err := os.Create("tape.txt")
-	if err != nil {
-		return nil, err
-	}
-	return &Client{
+	c := &Client{
 		cl:           cl,
 		token:        token,
 		teamID:       teamID,
 		webclientAPI: fmt.Sprintf("https://%s.%s/api/", workspaceName, getSlackBaseDomain()),
 		edgeAPI:      fmt.Sprintf("https://edgeapi.%s/cache/%s/", getSlackBaseDomain(), teamID),
-		tape:         tape,
-	}, nil
+	}
+	for _, o := range opt {
+		o(c)
+	}
+	return c, nil
 }
 
 func NewWithToken(ctx context.Context, token string, cookies []*http.Cookie) (*Client, error) {
